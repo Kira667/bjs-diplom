@@ -1,0 +1,1 @@
+const logountButton = new LogoutButton();
