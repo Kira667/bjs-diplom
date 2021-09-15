@@ -1,6 +1,8 @@
 const logountButton = new LogoutButton();
+const board = new RatesBoard();
+const moneyManager = new MoneyManager();
 
-getStocks();
+getStocks(board);
 
 ApiConnector.current((res) => {
   if (res.success === true) {
@@ -8,9 +10,7 @@ ApiConnector.current((res) => {
   }
 });
 
-function getStocks() {
-  const board = new RatesBoard();
-
+function getStocks(board) {
   const ApiConnectorGetStocks = () => {
     ApiConnector.getStocks((res) => {
       if (res.success === true) {
@@ -35,26 +35,84 @@ function fillTableRates(data, board) {
   board.fillTable(data);
 }
 
-const moneyManager = new MoneyManager();
-
-moneyManager.addMoneyCallback = ({currency, amount}) => {
+moneyManager.addMoneyCallback = ({ currency, amount }) => {
   ApiConnector.addMoney({ currency, amount }, (res) => {
     if (res.success === true) {
       ProfileWidget.showProfile(res.data);
-      moneyManager.setMessage(true, 'Удачное пополнение баланса');
+      moneyManager.setMessage(true, "Удачное пополнение баланса");
     } else {
       moneyManager.setMessage(false, res.error);
     }
   });
 };
 
-moneyManager.conversionMoneyCallback = ({ fromCurrency, targetCurrency, fromAmount }) => {
-  ApiConnector.convertMoney({ fromCurrency, targetCurrency, fromAmount }, (res) => {
+moneyManager.conversionMoneyCallback = ({
+  fromCurrency,
+  targetCurrency,
+  fromAmount,
+}) => {
+  ApiConnector.convertMoney(
+    { fromCurrency, targetCurrency, fromAmount },
+    (res) => {
+      if (res.success === true) {
+        ProfileWidget.showProfile(res.data);
+        moneyManager.setMessage(true, "Удачное конвертирование валюты");
+      } else {
+        moneyManager.setMessage(false, res.error);
+      }
+    }
+  );
+};
+
+moneyManager.sendMoneyCallback = ({ to, amount, currency }) => {
+  ApiConnector.transferMoney({ to, amount, currency }, (res) => {
     if (res.success === true) {
       ProfileWidget.showProfile(res.data);
-      moneyManager.setMessage(true, 'Удачное конвертирование валюты');
+      moneyManager.setMessage(true, "Вы удачное перевели деньги");
     } else {
-      moneyManager.setMessage(false, res.error); 
+      moneyManager.setMessage(false, res.error);
+    }
+  });
+};
+
+const favoritesWidget = new FavoritesWidget();
+
+ApiConnector.getFavorites((res) => {
+  if (res.success === true) {
+    favoritesWidget.clearTable();
+    favoritesWidget.fillTable(res.data);
+    moneyManager.updateUsersList(res.data);
+  }
+});
+
+favoritesWidget.addUserCallback = function (data) {
+  ApiConnector.addUserToFavorites(data, (res) => {
+    if (res.success === true) {
+      favoritesWidget.clearTable();
+      favoritesWidget.fillTable(res.data);
+      moneyManager.updateUsersList(res.data);
+      moneyManager.setMessage(
+        true,
+        `Пользователь id: ${data.id} name: ${data.name} добавлен в адресную книгу`
+      );
+    } else {
+      moneyManager.setMessage(false, res.error);
+    }
+  });
+};
+
+favoritesWidget.removeUserCallback = function (userId) {
+  ApiConnector.removeUserFromFavorites(userId, (res) => {
+    if (res.success === true) {
+      favoritesWidget.clearTable();
+      favoritesWidget.fillTable(res.data);
+      moneyManager.updateUsersList(res.data);
+      moneyManager.setMessage(
+        true,
+        `Пользователь id: ${userId} удалён из адресной книги`
+      );
+    } else {
+      moneyManager.setMessage(false, res.error);
     }
   });
 };

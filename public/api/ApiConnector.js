@@ -132,7 +132,7 @@ class ApiConnector {
    * @param {Function} callback-функция с телом `data` в качестве параметра
    * @memberof ApiConnector
    */
-  static getFavorites(callback) {
+  static getFavorites(calback) {
     const asyncPart = async () => {
       const response = await fetch('favorites/', {
         method: 'GET',
@@ -143,7 +143,7 @@ class ApiConnector {
     };
     asyncPart()
       .then(({ responseBody }) => {
-        callback(responseBody);
+        calback(responseBody);
       })
       .catch((e) => {
         console.error("Произошла ошибка: ", e);
