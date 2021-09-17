@@ -1,4 +1,4 @@
-// `use strict`
+`use strict`
 const userForm = new UserForm();
 
 userForm.loginFormCallback = function (data) {
@@ -6,7 +6,7 @@ userForm.loginFormCallback = function (data) {
     if (res.success === true) {
       location.reload();
     } else {
-      userForm.setLoginErrorMessage("Не удалось авторизироваться!");
+      userForm.setLoginErrorMessage(res.error);
     }
   });
 };
@@ -16,7 +16,7 @@ userForm.registerFormCallback = function (data) {
     if (res.success === true) {
       location.reload();
     } else {
-      userForm.setRegisterErrorMessage("Не удалось зарегистрироваться!");
+      userForm.setRegisterErrorMessage(res.error);
     }
   });
 };

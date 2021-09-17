@@ -1,3 +1,4 @@
+`use strict`
 const logountButton = new LogoutButton();
 const board = new RatesBoard();
 const moneyManager = new MoneyManager();
@@ -6,12 +7,12 @@ getStocks(board);
 
 ApiConnector.current((res) => {
   if (res.success === true) {
-    workWithUser(res.data);
+    ProfileWidget.showProfile(res.data);
   }
 });
 
 function getStocks(board) {
-  const ApiConnectorGetStocks = () => {
+  const apiConnectorGetStocks = () => {
     ApiConnector.getStocks((res) => {
       if (res.success === true) {
         fillTableRates(res.data, board);
@@ -19,16 +20,12 @@ function getStocks(board) {
     });
   };
 
-  ApiConnectorGetStocks();
+  apiConnectorGetStocks();
 
-  setInterval(() => {
-    ApiConnectorGetStocks();
-  }, 1000 * 60);
+  setInterval(apiConnectorGetStocks, 1000 * 60);
 }
 
-function workWithUser(data) {
-  ProfileWidget.showProfile(data);
-}
+
 
 function fillTableRates(data, board) {
   board.clearTable();
@@ -91,10 +88,7 @@ favoritesWidget.addUserCallback = function (data) {
       favoritesWidget.clearTable();
       favoritesWidget.fillTable(res.data);
       moneyManager.updateUsersList(res.data);
-      moneyManager.setMessage(
-        true,
-        `Пользователь id: ${data.id} name: ${data.name} добавлен в адресную книгу`
-      );
+      moneyManager.setMessage(true, `Пользователь id: ${data.id} name: ${data.name} добавлен в адресную книгу`);
     } else {
       moneyManager.setMessage(false, res.error);
     }
@@ -107,10 +101,7 @@ favoritesWidget.removeUserCallback = function (userId) {
       favoritesWidget.clearTable();
       favoritesWidget.fillTable(res.data);
       moneyManager.updateUsersList(res.data);
-      moneyManager.setMessage(
-        true,
-        `Пользователь id: ${userId} удалён из адресной книги`
-      );
+      moneyManager.setMessage(true, `Пользователь id: ${userId} удалён из адресной книги`);
     } else {
       moneyManager.setMessage(false, res.error);
     }
